@@ -15,16 +15,17 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Login endpoint
-app.post('/', async (req, res) => {
+app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
+        console.log(user);
 
         if (!user) {
             return res.status(401).json({ error: 'Invalid Email or Password' });
         }
 
-        if (user.password !== password) {
+        if (bcrypt.compare(password, user.password) === false) {
             return res.status(401).json({ error: 'Invalid Password' });
         }
 
@@ -66,15 +67,7 @@ app.post('/signup', async (req, res) => {
 });
 
 
-
-(async () => {
-    try {
-        await connectDB();
-        app.listen(PORT, () => {
-            console.log(`Server is listening on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error('Failed to connect to MongoDB:', error.message);
-        process.exit(1);
-    }
-})();
+app.listen(PORT, async() => {
+    await connectDB();
+    console.log(`Server is listening on port ${PORT}`);
+});
